@@ -52,6 +52,7 @@ class TestbedDataset(InMemoryDataset):
         super(TestbedDataset, self).__init__(root, transform, pre_transform)
 
         self.dataset = dataset
+        print(self.processed_paths)
         if os.path.isfile(self.processed_paths[0]):
             print('Pre-processed data found: {}, loading ...'.format(self.processed_paths[0]))
             self.data, self.slices = torch.load(self.processed_paths[0])
@@ -87,14 +88,24 @@ class TestbedDataset(InMemoryDataset):
 
             label = y[name]
             protein = pro[name]
-            c_size, features, edge_index = complex_graph[name]
-            c_size1, features1, edge_index1 = ligand_graph[name]
+            c_size, feature, edge_index = complex_graph[name]
+            c_size1, feature1, edge_index1 = ligand_graph[name]
+
+            edge_index = np.array(edge_index)
+            edge_index1 = np.array(edge_index1)
+            feature = np.array(feature)
+            feature1 = np.array(feature1)
+            label = np.array(label)
+            # protein = np.array(protein)
+            name = np.array(name)
+
             data = PairData(
                 torch.LongTensor(edge_index).transpose(1, 0),
-                torch.Tensor(features),
-                torch.LongTensor(edge_index1).transpose(1, 0), torch.Tensor(features1),
-                torch.FloatTensor([label]),
-                torch.LongTensor([protein]),name
+                torch.Tensor(feature),
+                torch.LongTensor(edge_index1).transpose(1, 0),
+                torch.Tensor(feature1),
+                torch.FloatTensor(label),
+                torch.LongTensor(protein),name
                             )
             data_list.append(data)
         if self.pre_filter is not None:
